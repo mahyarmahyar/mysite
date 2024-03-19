@@ -11,11 +11,9 @@ def blog_view(request):
 
 
 def blog_single(request, pid):
-    post = get_object_or_404(Post, pk=pid)
-    if post.published_date > timezone.now():
-        return HttpResponseNotFound('<h1>404 - Not Found</h1>')
-    if not post.status == 1:
-        return HttpResponseNotFound('<h1>404 - Not Found</h1>')
+    post = get_object_or_404(Post, pk=pid, status=1,
+                             published_date__lte=timezone.now())
+
     post.counted_views += 1
     post.save()
     context = {'post': post}
