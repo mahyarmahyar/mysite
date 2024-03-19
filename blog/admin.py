@@ -1,16 +1,20 @@
 from django.contrib import admin
-from blog.models import Post
-
-# Register your models here.
+from .models import Post
 
 
 class PostAdmin(admin.ModelAdmin):
     search_fields = ['title', 'content']
     date_hierarchy = 'created_date'
     empty_value_display = '-empty-'
-    list_display = ('title', 'counted_views', 'status',
+    list_display = ('id', 'title', 'counted_views', 'status',
                     'published_date', 'created_date')
     list_filter = ('status', 'published_date',)
+
+    def counted_views(self, obj):
+        return obj.counted_view
+
+    counted_views.admin_order_field = 'counted_view'
+    counted_views.short_description = 'Counted Views'
 
 
 admin.site.register(Post, PostAdmin)
