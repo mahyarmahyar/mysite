@@ -79,34 +79,58 @@
           </div>
           <div class="navigation-area">
             <div class="row">
-              <div class="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
-                <div class="thumb">
-                  <a href="{{ prev_post.id }}"><img class="img-fluid" src="{% static 'img/blog/prev.jpg' %}" alt="" /></a>
-                </div>
-                <div class="arrow">
-                  <a href="{{ prev_post.id }}"><span class="lnr text-white lnr-arrow-left"></span></a>
-                </div>
-                <div class="detials">
-                  {% if prev_post %}
+              {% if prev_post and next_post %}
+                <div class="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
+                  <div class="thumb">
+                    <a href="{{ prev_post.id }}"><img class="img-fluid" src="{{ prev_post.image.url }}" alt="" width="100" /></a>
+                  </div>
+                  <div class="arrow">
+                    <a href="{{ prev_post.id }}"><span class="lnr text-white lnr-arrow-left"></span></a>
+                  </div>
+                  <div class="detials">
                     <a href="{{ prev_post.id }}"><h4>پست قبلی</h4></a>
                     <p>{{ prev_post.title }}</p>
-                  {% endif %}
+                  </div>
                 </div>
-              </div>
-              <div class="col-lg-6 col-md-6 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
-                <div class="detials">
-                  {% if next_post %}
+                <div class="col-lg-6 col-md-6 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
+                  <div class="detials">
                     <a href="{{ next_post.id }}"><h4>پست بعدی</h4></a>
                     <p>{{ next_post.title }}</p>
-                  {% endif %}
+                  </div>
+                  <div class="arrow">
+                    <a href="{{ next_post.id }}"><span class="lnr text-white lnr-arrow-right"></span></a>
+                  </div>
+                  <div class="thumb">
+                    <a href="{{ next_post.id }}"><img class="img-fluid" src="{{ next_post.image.url }}" alt="" width="100" /></a>
+                  </div>
                 </div>
-                <div class="arrow">
-                  <a href="{{ next_post.id }}"><span class="lnr text-white lnr-arrow-right"></span></a>
+              {% elif prev_post %}
+                <div class="col-lg-12 col-md-12 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
+                  <div class="thumb">
+                    <a href="{{ prev_post.id }}"><img class="img-fluid" src="{{ prev_post.image.url }}" alt="" width="100" /></a>
+                  </div>
+                  <div class="arrow">
+                    <a href="{{ prev_post.id }}"><span class="lnr text-white lnr-arrow-left"></span></a>
+                  </div>
+                  <div class="detials">
+                    <a href="{{ prev_post.id }}"><h4>پست قبلی</h4></a>
+                    <p>{{ prev_post.title }}</p>
+                  </div>
                 </div>
-                <div class="thumb">
-                  <a href="{{ next_post.id }}"><img class="img-fluid" src="{% static 'img/blog/next.jpg' %}" alt="" /></a>
+              {% elif next_post %}
+                <div class="col-lg-12 col-md-12 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
+                  <div class="detials">
+                    <a href="{{ next_post.id }}"><h4>پست بعدی</h4></a>
+                    <p>{{ next_post.title }}</p>
+                  </div>
+                  <div class="arrow">
+                    <a href="{{ next_post.id }}"><span class="lnr text-white lnr-arrow-right"></span></a>
+                  </div>
+                  <div class="thumb">
+                    <a href="{{ next_post.id }}"><img class="img-fluid" src="{{ next_post.image.url }}" alt="" width="100" /></a>
+                  </div>
                 </div>
-              </div>
+              {% endif %}
             </div>
           </div>
           <div class="comments-area">
