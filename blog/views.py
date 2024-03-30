@@ -5,7 +5,8 @@ from django.http import HttpResponseNotFound
 
 
 def blog_view(request):
-    posts = Post.objects.filter(status=1, published_date__lte=timezone.now())
+    posts = Post.objects.filter(
+        status=1, published_date__lte=timezone.now()).order_by('-published_date')
     context = {'posts': posts}
     return render(request, 'blog/blog-home.html', context)
 
@@ -17,7 +18,6 @@ def blog_single(request, pid):
     post.counted_views += 1
     post.save()
 
-    # Find next and previous published posts with a published date less than or equal to the current time
     next_post = Post.objects.filter(
         status=1, published_date__gt=post.published_date, published_date__lte=timezone.now()).order_by('published_date').first()
     prev_post = Post.objects.filter(
