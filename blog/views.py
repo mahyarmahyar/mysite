@@ -15,8 +15,13 @@ def blog_view(request, **kwargs):
         posts = posts.filter(author__username=kwargs['author_username'])
 
     paginator = Paginator(posts, 3)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    try:
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        posts = paginator.get_page(1)
+    except EmptyPage:
+        posts = paginator.get_page(1)
     context = {'posts': page_obj.object_list, 'page_obj': page_obj}
     return render(request, 'blog/blog-home.html', context)
 
@@ -77,3 +82,9 @@ def blog_search(request):
 
     context = {'posts': page_posts}
     return render(request, 'blog/blog-home.html', context)
+
+
+def blog_detail(request, pid):
+    post = get_object_or_404(Post, pk=pid, status=1,
+                             published_date__lte=timezone.now())
+    return render(request, 'blog/blog_detail.html', {'post': post})

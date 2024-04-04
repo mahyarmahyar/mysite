@@ -2,6 +2,7 @@ from django import template
 from blog.models import Post
 from blog.models import Category
 
+
 register = template.Library()
 
 
@@ -24,4 +25,10 @@ def postcategories():
 @register.inclusion_tag('blog/blog-search.html')
 def search():
     posts = Post.objects.filter(status=1).order_by('published_date')[:3]
+    return {'posts': posts}
+
+
+@register.inclusion_tag('blog/blog_detail.html')
+def blog_detail():
+    posts = Post.objects.filter(status=1)[:6]
     return {'posts': posts}
