@@ -12,7 +12,7 @@ class NameForm(forms.Form):
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
-        exclude = ['subject']  # Exclude subject field from the form
+        fields = '__all__'
 
     def clean(self):
         cleaned_data = super().clean()

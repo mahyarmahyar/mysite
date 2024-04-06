@@ -1,7 +1,7 @@
 from django import template
 from blog.models import Post
 from blog.models import Category
-from datetime import datetime
+from django.utils import timezone
 
 
 register = template.Library()
@@ -31,7 +31,7 @@ def search():
 
 @register.inclusion_tag('blog/blog_detail.html')
 def blog_detail():
-    now = datetime.now()
+    now = timezone.now()
     posts = Post.objects.filter(
         status=1, published_date__lte=now).order_by('published_date')[:6]
     return {'posts': posts}
