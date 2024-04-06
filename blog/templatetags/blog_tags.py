@@ -30,5 +30,5 @@ def search():
 
 @register.inclusion_tag('blog/blog_detail.html')
 def blog_detail():
-    posts = Post.objects.filter(status=1)[:6]
+    posts = Post.objects.filter(status=1).order_by('published_date')[:6]
     return {'posts': posts}
