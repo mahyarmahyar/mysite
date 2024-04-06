@@ -21,7 +21,7 @@ def contact_view(request):
         form = ContactForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your message here')
+            messages.success(request, 'We Received Your Massage')
         else:
             messages.error(request, 'An error occurred')
     form = ContactForm()

@@ -1,4 +1,15 @@
 {% load static %}
+{% block content %}
+
+{% endblock %}
+
+{% block notifications %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endblock notifications %}
 <!DOCTYPE html>
 <html lang="zxx" class="no-js">
   <head>
@@ -104,17 +115,7 @@
     <!-- #header -->
   </body>
 </html>
-{% block content %}
 
-{% endblock %}
-
-{% block notifications %}
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }}">
-    {{ message }}
-</div>
-{% endfor %}
-{% endblock notifications %}
 <!-- start footer Area -->
 <footer class="footer-area section-gap">
     <div class="container">
