@@ -1,0 +1,20 @@
+<div class="single-sidebar-widget tag-cloud-widget">
+  <h4 class="tagcloud-title">برچسب‌ها</h4>
+  <ul>
+    {% if not posts %}
+      {# اگر هیچ تگی وجود نداشت، تمام تگ‌ها را نمایش بده #}
+      {% for tag in all_tags %}
+        <li>
+          <a href="{% url 'blog:tag' tag_name=tag.name %}">{{ tag.name }}</a>
+        </li>
+      {% endfor %}
+    {% else %}
+      {# اگر تگ‌ها وجود داشتند، آنها را نمایش بده #}
+      {% for post in posts %}
+        <li>
+          <a href="{% url 'blog:tag' tag_name=post.name %}">{{ post.name }}</a>
+        </li>
+      {% endfor %}
+    {% endif %}
+  </ul>
+</div>

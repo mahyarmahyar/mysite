@@ -35,3 +35,9 @@ def blog_detail():
     posts = Post.objects.filter(
         status=1, published_date__lte=now).order_by('published_date')[:6]
     return {'posts': posts}
+
+
+@register.inclusion_tag('blog/blog-tags.html')
+def blog_tags(post):
+    posts = post.tags.all()
+    return {'posts': posts}

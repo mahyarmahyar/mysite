@@ -71,15 +71,15 @@
       <div class="container main-menu">
         <div class="row align-items-center justify-content-between d-flex">
           <div id="logo">
-            <a href="{% url 'website:index' %}"><img src="{% static 'img/logo.png' %}" alt="" title="" /></a>
+            <a href="{% url 'projectApp:index' %}"><img src="{% static 'img/logo.png' %}" alt="" title="" /></a>
           </div>
           <nav id="nav-menu-container">
             <ul class="nav-menu">
               <li>
-                <a href="{% url 'website:index' %}">Home</a>
+                <a href="{% url 'projectApp:index' %}">Home</a>
               </li>
               <li>
-                <a href="{% url 'website:about' %}">About</a>
+                <a href="{% url 'projectApp:about' %}">About</a>
               </li>
               <li>
                   <a href="{% url 'blog:index' %}">Blog</a>
@@ -88,7 +88,7 @@
                 <a href="">Pages</a>
                 <ul>
                   <li>
-                    <a href="{% url 'website:elements' %}">Elements</a>
+                    <a href="{% url 'projectApp:elements' %}">Elements</a>
                   </li>
                   <li class="menu-has-children">
                     <a href="">Level 2</a>
@@ -104,7 +104,7 @@
                 </ul>
               </li>
               <li>
-                <a href="{% url 'website:contact' %}">Contact</a>
+                <a href="{% url 'projectApp:contact' %}">Contact</a>
               </li>
             </ul>
           </nav>
@@ -170,7 +170,7 @@
             <h6>Newsletter</h6>
             <p>For business professionals caught between high OEM price and mediocre print and graphic output.</p>
             <div>
-              <form action="{% url 'website:newsletter' %}" method="post" class="subscription relative">
+              <form action="{% url 'projectApp:newsletter' %}" method="post" class="subscription relative">
                 {% csrf_token %}
                 <div class="input-group d-flex flex-row">
                   <input name="email" placeholder="Email Address" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Email Address '" required="" type="email" />
