@@ -12,4 +12,5 @@ urlpatterns = [
     path('search/', blog_search, name='search'),
     path('<int:pid>/', blog_view, name='blog_detail'),
 
+
 ]

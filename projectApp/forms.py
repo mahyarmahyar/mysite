@@ -1,5 +1,6 @@
 from django import forms
 from projectApp.models import Contact, Newsletter
+from captcha.fields import CaptchaField
 
 
 class NameForm(forms.Form):
@@ -7,9 +8,12 @@ class NameForm(forms.Form):
     email = forms.EmailField()
     subject = forms.CharField(max_length=255, required=False)
     message = forms.CharField(widget=forms.Textarea)
+    captcha = CaptchaField()
 
 
 class ContactForm(forms.ModelForm):
+    captcha = CaptchaField()
+
     class Meta:
         model = Contact
         fields = '__all__'
