@@ -1,13 +1,19 @@
-from django.shortcuts import render, get_object_or_404
-from blog.models import Post, Comment
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from blog.models import Post, Comment
+from blog.forms import CommentForm
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+
+
+def get_queryset():
+    return Post.objects.filter(status=1, published_date__lte=timezone.now())
 
 
 def blog_view(request, **kwargs):
-    posts = Post.objects.filter(
-        status=1, published_date__lte=timezone.now()).order_by('-published_date')
+    posts = get_queryset().order_by('-published_date')
 
     if kwargs.get('category_name') is not None:
         posts = posts.filter(category__name=kwargs['category_name'])
@@ -17,43 +23,57 @@ def blog_view(request, **kwargs):
         posts = posts.filter(tags__name__in=[kwargs['tag_name']])
 
     paginator = Paginator(posts, 3)
+    page_number = request.GET.get('page')
     try:
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        page_obj = paginator.page(page_number)
     except PageNotAnInteger:
-        posts = paginator.get_page(1)
+        page_obj = paginator.page(1)
     except EmptyPage:
-        posts = paginator.get_page(1)
+        page_obj = paginator.page(paginator.num_pages)
+
     context = {'posts': page_obj.object_list, 'page_obj': page_obj}
     return render(request, 'blog/blog-home.html', context)
 
 
 def blog_single(request, pid):
-    post = get_object_or_404(Post, pk=pid, status=1,
-                             published_date__lte=timezone.now())
-    post.counted_views += 1
-    post.save()
+    post = get_object_or_404(get_queryset(), pk=pid)
 
-    next_post = Post.objects.filter(
-        status=1, published_date__gt=post.published_date, published_date__lte=timezone.now()).order_by('published_date').first()
-    prev_post = Post.objects.filter(
-        status=1, published_date__lt=post.published_date, published_date__lte=timezone.now()).order_by('-published_date').first()
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.save()
+            messages.success(request, 'We Received Your Message')
+            # Redirect after POST
+            return HttpResponseRedirect(request.path_info)
+        else:
+            messages.error(request, 'An error occurred')
+            # Redirect after failed POST
+            return HttpResponseRedirect(request.path_info)
+    else:
+        form = CommentForm()
+        post.counted_views += 1
+        post.save()
 
-    context = {
-        'post': post,
-        'next_post': next_post,
-        'prev_post': prev_post,
-    }
-    comments = Comment.objects.filter(
-        post=post.id, approach=True)
-    context = {'post': post, 'comments': comments}
-    return render(request, 'blog/blog-single.html', context)
+        next_post = Post.objects.filter(status=1, published_date__gt=post.published_date,
+                                        published_date__lte=timezone.now()).order_by('published_date').first()
+        prev_post = Post.objects.filter(status=1, published_date__lt=post.published_date,
+                                        published_date__lte=timezone.now()).order_by('-published_date').first()
+
+        comments = Comment.objects.filter(post=post.id, approach=True)
+        context = {
+            'post': post,
+            'next_post': next_post,
+            'prev_post': prev_post,
+            'comments': comments,
+            'form': form
+        }
+        return render(request, 'blog/blog-single.html', context)
 
 
 def blog_category(request, category_name):
-    posts = Post.objects.filter(
-        status=1, published_date__lte=timezone.now())
-    posts = posts.filter(category__name=category_name)
+    posts = get_queryset().filter(category__name=category_name)
 
     paginator = Paginator(posts, 3)
     page_number = request.GET.get('page')
@@ -69,11 +89,10 @@ def blog_category(request, category_name):
 
 
 def blog_search(request):
-    posts = Post.objects.filter(
-        status=1, published_date__lte=timezone.now())
-    if request.method == 'GET':
-        if s := request.GET.get('s'):
-            posts = posts.filter(content__contains=s)
+    posts = get_queryset()
+    if 's' in request.GET:
+        query = request.GET['s']
+        posts = posts.filter(content__icontains=query)
 
     paginator = Paginator(posts, 3)
     page_number = request.GET.get('page')
@@ -89,6 +108,5 @@ def blog_search(request):
 
 
 def blog_detail(request, pid):
-    post = get_object_or_404(Post, pk=pid, status=1,
-                             published_date__lte=timezone.now())
+    post = get_object_or_404(get_queryset(), pk=pid)
     return render(request, 'blog/blog_detail.html', {'post': post})

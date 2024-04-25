@@ -1,5 +1,5 @@
 from django import template
-from blog.models import Post
+from blog.models import Post, Comment
 from blog.models import Category
 from django.utils import timezone
 
@@ -41,3 +41,8 @@ def blog_detail():
 def blog_tags(post):
     posts = post.tags.all()
     return {'posts': posts}
+
+
+@register.simple_tag(name='comments_count')
+def function(pid):
+    return Comment.objects.filter(post=pid, approach=True).count()
