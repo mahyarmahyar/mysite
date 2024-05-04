@@ -36,7 +36,10 @@ def blog_view(request, **kwargs):
 
 
 def blog_single(request, pid):
-    post = get_object_or_404(get_queryset(), pk=pid)
+    post = get_object_or_404(Post, pk=pid)
+
+    if post.login_require and not request.user.is_authenticated:
+        return redirect('accounts:login')
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -44,11 +47,11 @@ def blog_single(request, pid):
             comment = form.save(commit=False)
             comment.post = post
             comment.save()
-            messages.success(request, 'We Received Your Message')
+            messages.success(request, 'پیام شما با موفقیت ثبت شد')
             # Redirect after POST
             return HttpResponseRedirect(request.path_info)
         else:
-            messages.error(request, 'An error occurred')
+            messages.error(request, 'خطایی رخ داده است')
             # Redirect after failed POST
             return HttpResponseRedirect(request.path_info)
     else:
