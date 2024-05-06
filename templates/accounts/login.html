@@ -42,12 +42,18 @@
       <label for="inputPassword" class="sr-only">Password</label>
       <input type="password" name="password" class="form-control" placeholder="Password" required />
       {% if form.errors %}
-        <p class="text-danger">{{ form.errors }}</p> <!-- نمایش پیام خطا در صورتی که ورودی‌ها اشتباه باشند -->
+        <div class="alert alert-danger" role="alert">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              {{ field }}: {{ error }}
+            {% endfor %}
+          {% endfor %}
+        </div>
       {% endif %}
       <div class="checkbox mb-3">
         <label><input type="checkbox" value="remember-me" />Remember me</label>
       </div>
-      <a href="{% url 'accounts:forgot_password' %}">Forgot password?</a> <!-- لینک به صفحه فراموشی رمز عبور -->
+      <a href="{% url 'accounts:forgot_password' %}">Forgot password?</a>
       <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
       <p class="mt-5 mb-3 text-muted">&copy; 2017-2019</p>
     </form>

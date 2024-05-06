@@ -4,6 +4,12 @@ from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
 
 
+class LoginForm(forms.Form):
+    username_or_email = forms.CharField(
+        label='Username or Email', max_length=100)
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+
+
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
