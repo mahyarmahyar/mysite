@@ -12,6 +12,9 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.sites.shortcuts import get_current_site
 from .forms import LoginForm
+from django.contrib.auth.hashers import check_password
+from django.contrib import messages
+from django.urls import reverse
 
 
 def login_view(request):
@@ -67,29 +70,51 @@ def signup_view(request):
 
 def forgot_password(request):
     if request.method == 'POST':
+        print(request.method)
+        print(request.POST)
+        # Process the form submission
         form = CustomPasswordResetForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             associated_users = User.objects.filter(email=email)
             if associated_users.exists():
                 for user in associated_users:
+                    # Generate a token for password reset
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = default_token_generator.make_token(user)
+
+                    # Construct the reset password link
+                    reset_url = reverse('accounts:reset_password', kwargs={
+                                        'uidb64': uid, 'token': token})
+
+                    # Send reset password email
                     subject = 'Password Reset'
                     email_template_name = 'accounts/password_reset_email.html'
                     c = {
                         "email": user.email,
                         'domain': get_current_site(request).domain,
-                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                        "uid": uid,
                         "user": user,
-                        'token': default_token_generator.make_token(user),
+                        'token': token,
+                        'reset_url': reset_url,
                         'protocol': 'http',
                     }
-                    email = render_to_string(
-                        email_template_name, c)
-                    send_mail(subject, email, 'admin@example.com',
-                              [user.email])
-            return redirect('password_reset_done')
+                    email_content = render_to_string(email_template_name, c)
+                    send_mail(subject, email_content,
+                              'admin@example.com', [user.email])
+
+                # Show success message to the user
+                messages.success(
+                    request, 'An email has been sent to reset your password. Please check your inbox.')
+
+                # Redirect to the login page
+                return redirect('accounts:login')
+            else:
+                messages.error(
+                    request, 'No user found with this email address.')
     else:
         form = CustomPasswordResetForm()
+
     return render(request, 'accounts/password_reset_form.html', {'form': form})
 
 
