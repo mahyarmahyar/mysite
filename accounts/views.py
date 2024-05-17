@@ -1,3 +1,4 @@
+from django.template import RequestContext
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -9,12 +10,13 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.sites.shortcuts import get_current_site
 from .forms import LoginForm
 from django.contrib.auth.hashers import check_password
 from django.contrib import messages
 from django.urls import reverse
+from django.contrib.auth.forms import SetPasswordForm
+from django.utils.encoding import force_str
 
 
 def login_view(request):
@@ -84,24 +86,22 @@ def forgot_password(request):
                     token = default_token_generator.make_token(user)
 
                     # Construct the reset password link
-                    reset_url = reverse('accounts:reset_password', kwargs={
-                                        'uidb64': uid, 'token': token})
+                    reset_url = request.build_absolute_uri(reverse('accounts:reset_password', kwargs={
+                        'uidb64': uid, 'token': token}))
 
                     # Send reset password email
                     subject = 'Password Reset'
                     email_template_name = 'accounts/password_reset_email.html'
-                    c = {
-                        "email": user.email,
-                        'domain': get_current_site(request).domain,
-                        "uid": uid,
-                        "user": user,
-                        'token': token,
-                        'reset_url': reset_url,
-                        'protocol': 'http',
-                    }
-                    email_content = render_to_string(email_template_name, c)
-                    send_mail(subject, email_content,
-                              'admin@example.com', [user.email])
+                    email_content = f"""
+                    <html>
+                      <head></head>
+                      <body>
+                        <p>Click <a href="{reset_url}">here</a> to reset your password.</p>
+                      </body>
+                    </html>
+                    """
+                    send_mail(subject, '', 'admin@example.com',
+                              [user.email], html_message=email_content)
 
                 # Show success message to the user
                 messages.success(
@@ -119,15 +119,24 @@ def forgot_password(request):
 
 
 def reset_password(request, uidb64, token):
-    if request.method == 'POST':
-        form = CustomSetPasswordForm(request.user, request.POST)
-        if form.is_valid():
-            new_password = form.cleaned_data['new_password2']
-            uid = urlsafe_base64_decode(uidb64).decode('utf-8')
-            user = User.objects.get(pk=uid)
-            user.set_password(new_password)
-            user.save()
-            return redirect('password_reset_complete')
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form = SetPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(
+                    request, 'Your password has been reset. You can now log in with your new password.')
+                return redirect('accounts:login')
+        else:
+            form = SetPasswordForm(user)
     else:
-        form = CustomSetPasswordForm()
-    return render(request, 'accounts/password_reset_confirm.html', {'form': form})
+        messages.error(
+            request, 'The password reset link is invalid, possibly because it has already been used. Please request a new password reset.')
+
+    return render(request, 'accounts/reset_password.html', {'form': form})
