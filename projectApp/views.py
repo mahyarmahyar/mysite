@@ -36,3 +36,7 @@ def newsletter_view(request):
             return HttpResponseRedirect('/')
     else:
         return HttpResponseRedirect('/')
+
+
+def coming_soon_view(request):
+    return render(request, 'coming_soon.html')

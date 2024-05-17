@@ -17,6 +17,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.forms import SetPasswordForm
 from django.utils.encoding import force_str
+from django.http import HttpResponse
 
 
 def login_view(request):
@@ -72,9 +73,6 @@ def signup_view(request):
 
 def forgot_password(request):
     if request.method == 'POST':
-        print(request.method)
-        print(request.POST)
-        # Process the form submission
         form = CustomPasswordResetForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
@@ -91,7 +89,6 @@ def forgot_password(request):
 
                     # Send reset password email
                     subject = 'Password Reset'
-                    email_template_name = 'accounts/password_reset_email.html'
                     email_content = f"""
                     <html>
                       <head></head>
@@ -103,12 +100,8 @@ def forgot_password(request):
                     send_mail(subject, '', 'admin@example.com',
                               [user.email], html_message=email_content)
 
-                # Show success message to the user
-                messages.success(
-                    request, 'An email has been sent to reset your password. Please check your inbox.')
-
-                # Redirect to the login page
-                return redirect('accounts:login')
+                # Redirect to the password reset sent page
+                return redirect('accounts:password_reset_done')
             else:
                 messages.error(
                     request, 'No user found with this email address.')
@@ -127,16 +120,21 @@ def reset_password(request, uidb64, token):
 
     if user is not None and default_token_generator.check_token(user, token):
         if request.method == 'POST':
-            form = SetPasswordForm(user, request.POST)
+            form = CustomSetPasswordForm(user, request.POST)
             if form.is_valid():
                 form.save()
                 messages.success(
-                    request, 'Your password has been reset. You can now log in with your new password.')
+                    request, 'Your password has been set. You may log in now.')
                 return redirect('accounts:login')
         else:
-            form = SetPasswordForm(user)
+            form = CustomSetPasswordForm(user)
     else:
         messages.error(
-            request, 'The password reset link is invalid, possibly because it has already been used. Please request a new password reset.')
+            request, 'The password reset link is invalid, possibly because it has already been used.')
+        return redirect('accounts:reset_password_invalid')
 
-    return render(request, 'accounts/reset_password.html', {'form': form})
+    return render(request, 'accounts/password_reset_confirm.html', {'form': form})
+
+
+def reset_password_invalid(request):
+    return render(request, 'accounts/reset_password_invalid.html')
